@@ -17,4 +17,5 @@ urlpatterns = [
     path("email-validation/<key>", email_validation, name="api_email_validation"),
     path("password-update", password_update, name="api_password_update"),
     path("password-forget", password_forget, name="api_password_forget"),
+    path("password-reset/<key>", password_reset, name="api_password_reset"),
 ]

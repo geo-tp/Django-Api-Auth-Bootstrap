@@ -50,6 +50,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
+    "EXCEPTION_HANDLER": "main.exceptions.custom_exception_handler",
 }
 
 AUTHENTICATION_BACKENDS = [
@@ -150,3 +151,6 @@ EMAIL_HOST_PASSWORD = "AdminAdmin38"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+EMAIL_VALIDATION_URL = "http://localhost:3000/email-confirmation/"
+PASSWORD_RESET_URL = "http://localhost:3000/password-reset/"

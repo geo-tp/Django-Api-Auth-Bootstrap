@@ -14,10 +14,26 @@ from user.models import CustomUser
 from django.contrib.auth.password_validation import validate_password
 from django.core.mail import send_mail
 from authentication.emails import (
-    register_confirmation_email,
+    register_confirmation_body,
 )
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
+from main.responses import format_api_response
+from .messages import (
+    LOGIN_SUCCESS,
+    LOGOUT_SUCCESS,
+    REGISTER_SUCCESS,
+    EMAIL_CONFIRMATION_REQUIRED,
+    EMAIL_CONFIRMATION_DONE,
+    EMAIL_CONFIRMATION_ALREADY_DONE,
+    OLD_PASSWORD_INCORRECT,
+    PASSWORD_UPDATE_SUCCESS,
+    PASSWORD_RESET_LINK_SENT,
+    TOKEN_ALREADY_USED,
+    MISC_ERROR,
+)
+
+from main.settings import EMAIL_VALIDATION_URL, PASSWORD_RESET_URL
 
 
 class Login(ObtainAuthToken):
@@ -27,10 +43,16 @@ class Login(ObtainAuthToken):
         user = serializer.validated_data["user"]
 
         if not user.email_validated:
-            return Response({"detail": "You need to confirm your email"})
+            api_response = format_api_response(
+                status=401, message=EMAIL_CONFIRMATION_REQUIRED, error=True
+            )
+            return Response(api_response)
 
         token, created = Token.objects.get_or_create(user=user)
-        return Response({"token": token.key})
+        api_response = format_api_response(
+            content={"token": token.key}, message=LOGIN_SUCCESS
+        )
+        return Response(api_response, status=200)
 
 
 login = Login.as_view()
@@ -40,7 +62,8 @@ class Logout(APIView):
     def post(self, request, *args, **kwargs):
         request.user.auth_token.delete()
 
-        return Response("User Logged out successfully")
+        api_response = format_api_response(message=LOGOUT_SUCCESS)
+        return Response(api_response, status=200)
 
 
 logout = Logout.as_view()
@@ -55,11 +78,21 @@ class Register(APIView):
 
     def get_email_confirmation_link(self, user):
         email_token = EmailValidationToken.objects.create(user=user)
-        return f"http://localhost:8000/{email_token}"
+        return f"{EMAIL_VALIDATION_URL}{email_token}"
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
+        try:
+            password = request.data["password"]
+            validate_password(password)
+        except ValidationError as e:
+            api_response = format_api_response(
+                content={"password": e}, status=401, error=True, message=MISC_ERROR
+            )
+            return Response(api_response, status=401)
+
         user = serializer.save()
         confirmation_link = self.get_email_confirmation_link(user)
         print("CONFIRMATION LINK :", confirmation_link)
@@ -71,10 +104,9 @@ class Register(APIView):
         #     [user.email],
         #     fail_silently=False,
         # )
+        api_response = format_api_response(message=REGISTER_SUCCESS)
 
-        return Response(
-            {"detail": "Successfully registered, you will receive an email"}
-        )
+        return Response(api_response, status=200)
 
 
 register = Register.as_view()
@@ -89,14 +121,19 @@ class EmailValidation(APIView):
         validation_token = get_object_or_404(EmailValidationToken, key=key)
 
         if validation_token.is_used:
-            return Response({"detail": "Email is already confirmed"})
+            api_response = format_api_response(
+                message=EMAIL_CONFIRMATION_ALREADY_DONE, status=401
+            )
+            return Response(api_response, status=401)
 
         validation_token.user.email_validated = True
         validation_token.is_used = True
         validation_token.save()
         validation_token.user.save()
 
-        return Response({"detail": "Email confirmation is done, you can login now"})
+        api_response = format_api_response(message=EMAIL_CONFIRMATION_DONE)
+
+        return Response(api_response, status=200)
 
 
 email_validation = EmailValidation.as_view()
@@ -114,20 +151,26 @@ class PasswordUpdate(APIView):
         old_password = serializer.data["old_password"]
         new_password = serializer.data["new_password"]
         user = request.user
-        print(user.check_password(old_password))
 
         if not user.check_password(old_password):
-            return Response({"detail": "Old password is incorrect"})
+            api_response = format_api_response(
+                message=OLD_PASSWORD_INCORRECT, status=401
+            )
+            return Response(api_response, status=401)
 
         try:
             validate_password(new_password, user)
         except ValidationError as e:
-            return Response({"detail": e})
+            api_response = format_api_response(
+                content={"password": e}, status=401, error=True, message=MISC_ERROR
+            )
+            return Response(api_response, status=401)
 
         user.set_password(new_password)
         user.save()
 
-        return Response({"detail": "Password Updated successfully"})
+        api_reponse = format_api_response(message=PASSWORD_UPDATE_SUCCESS)
+        return Response(api_reponse, status=200)
 
 
 password_update = PasswordUpdate.as_view()
@@ -151,31 +194,45 @@ class PasswordForget(APIView):
             user = None
 
         if user:
-            validation_token = PasswordValidationToken.objects.create(user)
-            print("PASSWORD TOKEN:", validation_token.key)
+            if user.email_validated:
+                (
+                    validation_token,
+                    created,
+                ) = PasswordValidationToken.objects.get_or_create(user=user)
+                print("PASSWORD TOKEN:", validation_token)
 
-            # send_mail(
-            #     f"Welcome {user.username}",
-            #     register_confirmation_email(user.username, "XXXXX"),
-            #     "noreply@APP_NAME.com",
-            #     [user.email],
-            #     fail_silently=False,
-            # )
+                # send_mail(
+                #     f"Welcome {user.username}",
+                #     register_confirmation_email(user.username, "XXXXX"),
+                #     "noreply@APP_NAME.com",
+                #     [user.email],
+                #     fail_silently=False,
+                # )
 
-        return Response({"detail": "Check reset link in your mailbox"})
+        api_response = format_api_response(message=PASSWORD_RESET_LINK_SENT)
+        return Response(api_response, status=200)
 
 
 password_forget = PasswordForget.as_view()
 
 
 class PasswordReset(APIView):
-    serializer_class = PasswordForgetSerializer
+    serializer_class = PasswordResetSerializer
     permission_classes = []
 
     def get_serializer(self, *args, **kwargs):
         return self.serializer_class(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        key = kwargs.get("key")
+        validation_token = get_object_or_404(PasswordValidationToken, key=key)
+        user = validation_token.user
+        if validation_token.is_used:
+            api_response = format_api_response(
+                message=TOKEN_ALREADY_USED, status=401, error=True
+            )
+            return Response(api_response, status=401)
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         password = serializer.data["password"]
@@ -185,10 +242,13 @@ class PasswordReset(APIView):
         except ValidationError as e:
             return Response({"detail": e})
 
-        user.set_password(new_password)
+        user.set_password(password)
         user.save()
+        validation_token.is_used = True
+        validation_token.save()
 
-        return Response({"detail": "Password Reset successfully"})
+        api_response = format_api_response(message=PASSWORD_UPDATE_SUCCESS)
+        return Response(api_response, status=200)
 
 
 password_reset = PasswordReset.as_view()

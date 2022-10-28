@@ -12,15 +12,12 @@ class CustomToken(models.Model):
     """
 
     key = models.CharField(_("Key"), max_length=40, primary_key=True)
-
-    user = models.OneToOneField(
-        CustomUser,
-        related_name="auth_custom_token",
-        on_delete=models.CASCADE,
-        verbose_name="user",
-    )
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     created = models.DateTimeField(_("Created"), auto_now_add=True)
     is_used = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
 
     def save(self, *args, **kwargs):
         if not self.key:
