@@ -16,14 +16,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
+from user.views import UserViewSet
 
 api_router = routers.DefaultRouter()
-
+api_router.register(r"user", UserViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("api/v1/auth/", include("authentication.urls")),
-    # path('api-token-auth/', auth_views.obtain_auth_token, name='api_token_auth'),  # <-- And here
     path('api/v1/', include((api_router.urls)) )
 
 ]

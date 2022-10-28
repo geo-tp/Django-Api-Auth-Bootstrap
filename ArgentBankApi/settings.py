@@ -52,10 +52,6 @@ REST_FRAMEWORK = {
     ],
 }
 
-AUTHENTICATION_BACKENDS = [
-    "authentication.backends.AuthentificationBackend",
-]
-
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -142,11 +138,3 @@ STATIC_URL = "/static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "user.CustomUser"
-
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_HOST_USER = "macartefidelite.test@gmail.com"
-EMAIL_HOST_PASSWORD = "AdminAdmin38"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

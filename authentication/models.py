@@ -1,33 +1,42 @@
-# import binascii
-# import os
+import binascii
+import os
 
-# from django.db import models
-# from django.utils.translation import gettext_lazy as _
-# from user.models import CustomUser
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from user.models import CustomUser
 
-# class CustomToken(models.Model):
-#     """
-#     The default authorization token model.
-#     """
-#     key = models.CharField(_("Key"), max_length=40, primary_key=True)
 
-#     user = models.OneToOneField(
-#         CustomUser, related_name='auth_custom_token',
-#         on_delete=models.CASCADE, verbose_name="user"
-#     )
-#     created = models.DateTimeField(_("Created"), auto_now_add=True)
+class CustomToken(models.Model):
+    """
+    The default authorization token model.
+    """
 
-#     class Meta:
-#         verbose_name = _("Token")
-#         verbose_name_plural = _("Tokens")
+    key = models.CharField(_("Key"), max_length=40, primary_key=True)
 
-#     def save(self, *args, **kwargs):
-#         if not self.key:
-#             self.key = self.generate_key()
-#         return super(CustomToken, self).save(*args, **kwargs)
+    user = models.OneToOneField(
+        CustomUser,
+        related_name="auth_custom_token",
+        on_delete=models.CASCADE,
+        verbose_name="user",
+    )
+    created = models.DateTimeField(_("Created"), auto_now_add=True)
+    is_used = models.BooleanField(default=False)
 
-#     def generate_key(self):
-#         return binascii.hexlify(os.urandom(20)).decode()
+    def save(self, *args, **kwargs):
+        if not self.key:
+            self.key = self.generate_key()
+        return super(CustomToken, self).save(*args, **kwargs)
 
-#     def __str__(self):
-#         return self.key
+    def generate_key(self):
+        return binascii.hexlify(os.urandom(20)).decode()
+
+    def __str__(self):
+        return self.key
+
+
+class EmailValidationToken(CustomToken):
+    pass
+
+
+class PasswordValidationToken(CustomToken):
+    pass
