@@ -9,6 +9,7 @@ from .serializers import (
     PasswordForgetSerializer,
 )
 from rest_framework.authtoken.models import Token
+from rest_framework import status
 from .models import EmailValidationToken, PasswordValidationToken
 from user.models import CustomUser
 from django.contrib.auth.password_validation import validate_password
@@ -17,6 +18,7 @@ from authentication.emails import (
     get_register_confirmation_email,
 )
 from django.shortcuts import get_object_or_404
+from rest_framework import permissions
 from django.core.exceptions import ValidationError
 from main.responses import format_api_response
 from .messages import (
@@ -38,6 +40,9 @@ from main.settings import EMAIL_VALIDATION_URL, PASSWORD_RESET_URL
 
 
 class Login(ObtainAuthToken):
+
+    permission_classes = [permissions.AllowAny]
+
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -45,32 +50,39 @@ class Login(ObtainAuthToken):
 
         if not user.email_validated:
             api_response = format_api_response(
-                status=401, message=EMAIL_CONFIRMATION_REQUIRED, error=True
+                status=status.HTTP_401_UNAUTHORIZED,
+                message=EMAIL_CONFIRMATION_REQUIRED,
+                error=True,
             )
-            return Response(api_response, status=401)
+            return Response(api_response, status=status.HTTP_401_UNAUTHORIZED)
 
         if not user.is_active:
             api_response = format_api_response(
-                status=401, message=ACCOUNT_DEACTIVATED, error=True
+                status=status.HTTP_401_UNAUTHORIZED,
+                message=ACCOUNT_DEACTIVATED,
+                error=True,
             )
-            return Response(api_response, status=401)
+            return Response(api_response, status=status.HTTP_401_UNAUTHORIZED)
 
         token, created = Token.objects.get_or_create(user=user)
         api_response = format_api_response(
             content={"token": token.key}, message=LOGIN_SUCCESS
         )
-        return Response(api_response, status=200)
+        return Response(api_response, status=status.HTTP_200_OK)
 
 
 login = Login.as_view()
 
 
 class Logout(APIView):
+
+    permission_classes = [permissions.IsAuthenticated]
+
     def post(self, request, *args, **kwargs):
         request.user.auth_token.delete()
 
         api_response = format_api_response(message=LOGOUT_SUCCESS)
-        return Response(api_response, status=200)
+        return Response(api_response, status=status.HTTP_200_OK)
 
 
 logout = Logout.as_view()
@@ -78,7 +90,7 @@ logout = Logout.as_view()
 
 class Register(APIView):
     serializer_class = RegisterSerializer
-    permission_classes = []
+    permission_classes = [permissions.AllowAny]
 
     def get_serializer(self, *args, **kwargs):
         return self.serializer_class(*args, **kwargs)
@@ -96,9 +108,12 @@ class Register(APIView):
             validate_password(password)
         except ValidationError as e:
             api_response = format_api_response(
-                content={"password": e}, status=401, error=True, message=MISC_ERROR
+                content={"password": e},
+                status=status.HTTP_401_UNAUTHORIZED,
+                error=True,
+                message=MISC_ERROR,
             )
-            return Response(api_response, status=401)
+            return Response(api_response, status=status.HTTP_401_UNAUTHORIZED)
 
         user = serializer.save()
         confirmation_link = self.get_email_confirmation_link(user)
@@ -113,14 +128,14 @@ class Register(APIView):
         # )
         api_response = format_api_response(message=REGISTER_SUCCESS)
 
-        return Response(api_response, status=200)
+        return Response(api_response, status=status.HTTP_200_OK)
 
 
 register = Register.as_view()
 
 
 class EmailValidation(APIView):
-    permission_classes = []
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
 
@@ -129,9 +144,10 @@ class EmailValidation(APIView):
 
         if validation_token.is_used:
             api_response = format_api_response(
-                message=EMAIL_CONFIRMATION_ALREADY_DONE, status=401
+                message=EMAIL_CONFIRMATION_ALREADY_DONE,
+                status=status.HTTP_401_UNAUTHORIZED,
             )
-            return Response(api_response, status=401)
+            return Response(api_response, status=status.HTTP_401_UNAUTHORIZED)
 
         validation_token.user.email_validated = True
         validation_token.is_used = True
@@ -140,7 +156,7 @@ class EmailValidation(APIView):
 
         api_response = format_api_response(message=EMAIL_CONFIRMATION_DONE)
 
-        return Response(api_response, status=200)
+        return Response(api_response, status=status.HTTP_200_OK)
 
 
 email_validation = EmailValidation.as_view()
@@ -148,6 +164,7 @@ email_validation = EmailValidation.as_view()
 
 class PasswordUpdate(APIView):
     serializer_class = PasswordUpdateSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_serializer(self, *args, **kwargs):
         return self.serializer_class(*args, **kwargs)
@@ -161,23 +178,26 @@ class PasswordUpdate(APIView):
 
         if not user.check_password(old_password):
             api_response = format_api_response(
-                message=OLD_PASSWORD_INCORRECT, status=401
+                message=OLD_PASSWORD_INCORRECT, status=status.HTTP_401_UNAUTHORIZED
             )
-            return Response(api_response, status=401)
+            return Response(api_response, status=status.HTTP_401_UNAUTHORIZED)
 
         try:
             validate_password(new_password, user)
         except ValidationError as e:
             api_response = format_api_response(
-                content={"password": e}, status=401, error=True, message=MISC_ERROR
+                content={"password": e},
+                status=status.HTTP_401_UNAUTHORIZED,
+                error=True,
+                message=MISC_ERROR,
             )
-            return Response(api_response, status=401)
+            return Response(api_response, status=status.HTTP_401_UNAUTHORIZED)
 
         user.set_password(new_password)
         user.save()
 
         api_reponse = format_api_response(message=PASSWORD_UPDATE_SUCCESS)
-        return Response(api_reponse, status=200)
+        return Response(api_reponse, status=status.HTTP_200_OK)
 
 
 password_update = PasswordUpdate.as_view()
@@ -185,7 +205,7 @@ password_update = PasswordUpdate.as_view()
 
 class PasswordForget(APIView):
     serializer_class = PasswordForgetSerializer
-    permission_classes = []
+    permission_classes = [permissions.AllowAny]
 
     def get_serializer(self, *args, **kwargs):
         return self.serializer_class(*args, **kwargs)
@@ -217,7 +237,7 @@ class PasswordForget(APIView):
                 # )
 
         api_response = format_api_response(message=PASSWORD_RESET_LINK_SENT)
-        return Response(api_response, status=200)
+        return Response(api_response, status=status.HTTP_200_OK)
 
 
 password_forget = PasswordForget.as_view()
@@ -225,7 +245,7 @@ password_forget = PasswordForget.as_view()
 
 class PasswordReset(APIView):
     serializer_class = PasswordResetSerializer
-    permission_classes = []
+    permission_classes = [permissions.AllowAny]
 
     def get_serializer(self, *args, **kwargs):
         return self.serializer_class(*args, **kwargs)
@@ -236,9 +256,11 @@ class PasswordReset(APIView):
         user = validation_token.user
         if validation_token.is_used:
             api_response = format_api_response(
-                message=TOKEN_ALREADY_USED, status=401, error=True
+                message=TOKEN_ALREADY_USED,
+                status=status.HTTP_401_UNAUTHORIZED,
+                error=True,
             )
-            return Response(api_response, status=401)
+            return Response(api_response, status=status.HTTP_401_UNAUTHORIZED)
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -248,9 +270,12 @@ class PasswordReset(APIView):
             validate_password(password)
         except ValidationError as e:
             api_response = format_api_response(
-                content={"password": e}, status=401, error=True, message=MISC_ERROR
+                content={"password": e},
+                status=status.HTTP_401_UNAUTHORIZED,
+                error=True,
+                message=MISC_ERROR,
             )
-            return Response(api_response, status=401)
+            return Response(api_response, status=status.HTTP_401_UNAUTHORIZED)
 
         user.set_password(password)
         user.save()
@@ -258,20 +283,22 @@ class PasswordReset(APIView):
         validation_token.save()
 
         api_response = format_api_response(message=PASSWORD_UPDATE_SUCCESS)
-        return Response(api_response, status=200)
+        return Response(api_response, status=status.HTTP_200_OK)
 
 
 password_reset = PasswordReset.as_view()
 
 
 class DeactivateAccount(APIView):
+    permission_classes = [permissions.IsAuthenticated()]
+
     def post(self, request, *args, **kwargs):
         user = request.user
         user.is_active = False
         user.save()
 
         api_response = format_api_response(message=ACCOUNT_DEACTIVATED)
-        return Response(api_response, status=200)
+        return Response(api_response, status=status.HTTP_200_OK)
 
 
 deactivate_account = DeactivateAccount().as_view()

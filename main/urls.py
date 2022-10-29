@@ -18,6 +18,7 @@ from django.urls import path, include
 from rest_framework import routers
 from user.views import UserViewSet
 from rest_framework.documentation import include_docs_urls
+from rest_framework import permissions
 
 admin.site.site_header = "API Administration"
 admin.site.site_title = "API Administration"
@@ -31,5 +32,12 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/v1/auth/", include("authentication.urls")),
     path("api/v1/", include((api_router.urls))),
-    path("api/v1/docs/", include_docs_urls(title="API Documentation", public=False)),
+    path(
+        "api/v1/docs/",
+        include_docs_urls(
+            title="API Documentation",
+            public=False,
+            permission_classes=[permissions.AllowAny],
+        ),
+    ),
 ]
