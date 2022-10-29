@@ -33,12 +33,3 @@ class UserViewSet(viewsets.GenericViewSet):
             content=serializer.data, message=PROFILE_UPDATE_SUCCESS
         )
         return Response(api_response, status=200)
-
-    @profile.mapping.delete
-    def delete_account(self, request, *args, **kwargs):
-        user = request.user
-        user.is_active = False
-        user.save()
-
-        api_response = format_api_response(message=ACCOUNT_DEACTIVATED)
-        return Response(api_response, status=200)

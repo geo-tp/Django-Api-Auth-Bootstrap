@@ -14,7 +14,7 @@ from user.models import CustomUser
 from django.contrib.auth.password_validation import validate_password
 from django.core.mail import send_mail
 from authentication.emails import (
-    register_confirmation_body,
+    get_register_confirmation_email,
 )
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
@@ -106,7 +106,7 @@ class Register(APIView):
 
         # send_mail(
         #     f"Welcome {user.username}",
-        #     register_confirmation_email(user.username, "XXXXX"),
+        #     get_register_confirmation_email(user.username, "XXXXX"),
         #     "noreply@APP_NAME.com",
         #     [user.email],
         #     fail_silently=False,
@@ -245,9 +245,12 @@ class PasswordReset(APIView):
         password = serializer.data["password"]
 
         try:
-            validate_password(password, user)
+            validate_password(password)
         except ValidationError as e:
-            return Response({"detail": e})
+            api_response = format_api_response(
+                content={"password": e}, status=401, error=True, message=MISC_ERROR
+            )
+            return Response(api_response, status=401)
 
         user.set_password(password)
         user.save()
