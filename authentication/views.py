@@ -31,6 +31,7 @@ from .messages import (
     PASSWORD_RESET_LINK_SENT,
     TOKEN_ALREADY_USED,
     MISC_ERROR,
+    ACCOUNT_DEACTIVATED,
 )
 
 from main.settings import EMAIL_VALIDATION_URL, PASSWORD_RESET_URL
@@ -46,7 +47,13 @@ class Login(ObtainAuthToken):
             api_response = format_api_response(
                 status=401, message=EMAIL_CONFIRMATION_REQUIRED, error=True
             )
-            return Response(api_response)
+            return Response(api_response, status=401)
+
+        if not user.is_active:
+            api_response = format_api_response(
+                status=401, message=ACCOUNT_DEACTIVATED, error=True
+            )
+            return Response(api_response, status=401)
 
         token, created = Token.objects.get_or_create(user=user)
         api_response = format_api_response(
@@ -252,3 +259,16 @@ class PasswordReset(APIView):
 
 
 password_reset = PasswordReset.as_view()
+
+
+class DeactivateAccount(APIView):
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        user.is_active = False
+        user.save()
+
+        api_response = format_api_response(message=ACCOUNT_DEACTIVATED)
+        return Response(api_response, status=200)
+
+
+deactivate_account = DeactivateAccount().as_view()

@@ -8,6 +8,7 @@ from .views import (
     password_update,
     password_forget,
     password_reset,
+    deactivate_account,
 )
 
 urlpatterns = [
@@ -18,4 +19,5 @@ urlpatterns = [
     path("password-update", password_update, name="api_password_update"),
     path("password-forget", password_forget, name="api_password_forget"),
     path("password-reset/<key>", password_reset, name="api_password_reset"),
+    path("deactivate-account", deactivate_account, name="api_deactivate_account"),
 ]

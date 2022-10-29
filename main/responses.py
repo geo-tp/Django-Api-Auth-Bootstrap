@@ -1,6 +1,4 @@
-def format_api_response(
-    content=None, status=200, message="Request success", error=False
-):
+def format_api_response(content=None, status=200, message="", error=False):
 
     response = {"status": status, "message": message}
 

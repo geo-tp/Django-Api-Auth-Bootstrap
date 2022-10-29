@@ -3,13 +3,15 @@ from .models import CustomUser
 
 # from rest_auth.utils import import_callable
 
-class UserSerializer(serializers.ModelSerializer):
 
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = [
             "username",
             "email",
+            "first_name",
+            "last_name",
             "date_of_birth",
             "street_number",
             "street_type",
@@ -18,6 +20,7 @@ class UserSerializer(serializers.ModelSerializer):
             "city",
             "phone_number",
         ]
+        read_only_fields = ["username", "email"]
 
 
 # class BasicUserSerializer(serializers.ModelSerializer):
@@ -77,5 +80,5 @@ class UserSerializer(serializers.ModelSerializer):
 
 #         rep["card_number"] = hidePartOfPaymentMethod(rep["card_number"])
 #         rep["iban"] = hidePartOfPaymentMethod(rep["iban"])
-        
+
 #         return rep
