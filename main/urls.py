@@ -35,7 +35,6 @@ urlpatterns = [
         "api/v1/docs/",
         include_docs_urls(
             title="API Documentation",
-            public=False,
             permission_classes=[permissions.AllowAny],
         ),
     ),
