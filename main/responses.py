@@ -9,4 +9,5 @@ def format_api_response(content=None, status=200, message="", error=False):
 
     if error:
         response["error"] = True
+
     return response

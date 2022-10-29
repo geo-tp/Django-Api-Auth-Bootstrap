@@ -1,8 +1,6 @@
 from rest_framework import serializers
 from .models import CustomUser
 
-# from rest_auth.utils import import_callable
-
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:

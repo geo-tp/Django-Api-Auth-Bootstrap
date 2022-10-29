@@ -7,6 +7,8 @@ auto generated API documentation and administration panel.
 Installation
 -------
 
+This project was made with `python3.10.6`
+
 ### Create a python virtual environment
 ```python3 -m venv ENV_NAME```
 

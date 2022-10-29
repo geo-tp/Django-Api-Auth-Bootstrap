@@ -10,6 +10,10 @@ def custom_exception_handler(exc, context):
     if not response:
         return response
 
+    if response.status_code == 500:
+        response.data = {"error": "error"}
+        return response
+
     if response.data.get("detail", 0):
         message = response.data["detail"]
         del response.data["detail"]

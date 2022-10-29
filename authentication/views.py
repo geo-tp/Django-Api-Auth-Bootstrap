@@ -44,32 +44,34 @@ class Login(ObtainAuthToken):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
+        """
+        Login user with username/pwd or email/pwd
+        """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data["user"]
 
         if not user.email_validated:
             api_response = format_api_response(
-                status=status.HTTP_401_UNAUTHORIZED,
+                status=status.HTTP_400_BAD_REQUEST,
                 message=EMAIL_CONFIRMATION_REQUIRED,
                 error=True,
             )
-            return Response(api_response, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(api_response, status=status.HTTP_400_BAD_REQUEST)
 
         if not user.is_active:
             api_response = format_api_response(
-                status=status.HTTP_401_UNAUTHORIZED,
+                status=status.HTTP_400_BAD_REQUEST,
                 message=ACCOUNT_DEACTIVATED,
                 error=True,
             )
-            return Response(api_response, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(api_response, status=status.HTTP_400_BAD_REQUEST)
 
         token, created = Token.objects.get_or_create(user=user)
         api_response = format_api_response(
             content={"token": token.key}, message=LOGIN_SUCCESS
         )
         return Response(api_response, status=status.HTTP_200_OK)
-
 
 login = Login.as_view()
 
@@ -79,6 +81,9 @@ class Logout(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
+        """
+        Logout a user by removing its auth token
+        """
         request.user.auth_token.delete()
 
         api_response = format_api_response(message=LOGOUT_SUCCESS)
@@ -89,6 +94,9 @@ logout = Logout.as_view()
 
 
 class Register(APIView):
+    """
+    Register a new user
+    """
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
 
@@ -109,11 +117,11 @@ class Register(APIView):
         except ValidationError as e:
             api_response = format_api_response(
                 content={"password": e},
-                status=status.HTTP_401_UNAUTHORIZED,
+                status=status.HTTP_400_BAD_REQUEST,
                 error=True,
                 message=MISC_ERROR,
             )
-            return Response(api_response, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(api_response, status=status.HTTP_400_BAD_REQUEST)
 
         user = serializer.save()
         confirmation_link = self.get_email_confirmation_link(user)
@@ -135,6 +143,9 @@ register = Register.as_view()
 
 
 class EmailValidation(APIView):
+    """
+    Validate email with received token
+    """
     permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
@@ -145,9 +156,9 @@ class EmailValidation(APIView):
         if validation_token.is_used:
             api_response = format_api_response(
                 message=EMAIL_CONFIRMATION_ALREADY_DONE,
-                status=status.HTTP_401_UNAUTHORIZED,
+                status=status.HTTP_400_BAD_REQUEST,
             )
-            return Response(api_response, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(api_response, status=status.HTTP_400_BAD_REQUEST)
 
         validation_token.user.email_validated = True
         validation_token.is_used = True
@@ -163,6 +174,9 @@ email_validation = EmailValidation.as_view()
 
 
 class PasswordUpdate(APIView):
+    """
+    Update user password
+    """
     serializer_class = PasswordUpdateSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -178,20 +192,20 @@ class PasswordUpdate(APIView):
 
         if not user.check_password(old_password):
             api_response = format_api_response(
-                message=OLD_PASSWORD_INCORRECT, status=status.HTTP_401_UNAUTHORIZED
+                message=OLD_PASSWORD_INCORRECT, status=status.HTTP_400_BAD_REQUEST
             )
-            return Response(api_response, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(api_response, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             validate_password(new_password, user)
         except ValidationError as e:
             api_response = format_api_response(
                 content={"password": e},
-                status=status.HTTP_401_UNAUTHORIZED,
+                status=status.HTTP_400_BAD_REQUEST,
                 error=True,
                 message=MISC_ERROR,
             )
-            return Response(api_response, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(api_response, status=status.HTTP_400_BAD_REQUEST)
 
         user.set_password(new_password)
         user.save()
@@ -204,6 +218,9 @@ password_update = PasswordUpdate.as_view()
 
 
 class PasswordForget(APIView):
+    """
+    Send a link to reset password by mail when a correct email address is provided
+    """
     serializer_class = PasswordForgetSerializer
     permission_classes = [permissions.AllowAny]
 
@@ -244,6 +261,9 @@ password_forget = PasswordForget.as_view()
 
 
 class PasswordReset(APIView):
+    """
+    Reset user password with the one provided (requires password reset token)
+    """
     serializer_class = PasswordResetSerializer
     permission_classes = [permissions.AllowAny]
 
@@ -257,10 +277,10 @@ class PasswordReset(APIView):
         if validation_token.is_used:
             api_response = format_api_response(
                 message=TOKEN_ALREADY_USED,
-                status=status.HTTP_401_UNAUTHORIZED,
+                status=status.HTTP_400_BAD_REQUEST,
                 error=True,
             )
-            return Response(api_response, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(api_response, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -271,11 +291,11 @@ class PasswordReset(APIView):
         except ValidationError as e:
             api_response = format_api_response(
                 content={"password": e},
-                status=status.HTTP_401_UNAUTHORIZED,
+                status=status.HTTP_400_BAD_REQUEST,
                 error=True,
                 message=MISC_ERROR,
             )
-            return Response(api_response, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(api_response, status=status.HTTP_400_BAD_REQUEST)
 
         user.set_password(password)
         user.save()
@@ -290,10 +310,15 @@ password_reset = PasswordReset.as_view()
 
 
 class DeactivateAccount(APIView):
+    """
+    Deactivate user account, user will be disconnected and not able to connect anymore
+    """
     permission_classes = [permissions.IsAuthenticated()]
 
     def post(self, request, *args, **kwargs):
         user = request.user
+        auth_token = Token.objects.get(user=user)
+        auth_token.delete()
         user.is_active = False
         user.save()
 
