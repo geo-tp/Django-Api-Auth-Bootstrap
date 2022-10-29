@@ -13,6 +13,9 @@ from rest_framework import status
 
 
 class UserViewSet(viewsets.GenericViewSet):
+    """
+    User views to read/update profile
+    """
 
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer

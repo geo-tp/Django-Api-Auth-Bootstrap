@@ -32,8 +32,16 @@ class CustomToken(models.Model):
 
 
 class EmailValidationToken(CustomToken):
+    """
+    Token sended to user email during user registration process
+    """
+
     pass
 
 
 class PasswordValidationToken(CustomToken):
+    """
+    Token sended to user email during password reset process
+    """
+
     pass

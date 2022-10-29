@@ -1,5 +1,5 @@
 from rest_framework.views import exception_handler
-import copy
+from .responses import format_api_response
 
 
 def custom_exception_handler(exc, context):
@@ -10,10 +10,7 @@ def custom_exception_handler(exc, context):
     if not response:
         return response
 
-    # Now add the custom data to the response.
-    formatted_data = {}
-
-    if response.get("detail", 0):
+    if response.data.get("detail", 0):
         message = response.data["detail"]
         del response.data["detail"]
     else:
@@ -21,12 +18,11 @@ def custom_exception_handler(exc, context):
 
     if response is not None:
         body = response.data
-        formatted_data["body"] = body
 
-    formatted_data["message"] = message
-    formatted_data["status"] = response.status_code
-    formatted_data["error"] = True
+    api_response = format_api_response(
+        content=body, message=message, status=response.status_code, error=True
+    )
 
-    response.data = formatted_data
+    response.data = api_response
 
     return response

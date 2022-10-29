@@ -1,5 +1,7 @@
 def format_api_response(content=None, status=200, message="", error=False):
-
+    """
+    Harmonize api json response : {status: 200, body: {...}, message: "Request Success"}
+    """
     response = {"status": status, "message": message}
 
     if content:
