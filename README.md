@@ -26,23 +26,16 @@ Installation
 ```./manage.py runserver```
 
 ### Create Admin user
- ```./manage.py createsuperuser```.
+ ```./manage.py createsuperuser```
 
 Routes
 -------
 When dev server is lauched, visit http://localhost:8000/api/v1/docs
 
-Admininistration
+Administration
 -------
 When dev server is lauched, visit http://localhost:8000/admin
 
 Requirements
 -----
-
-#### asgiref==3.5.2
-#### backports.zoneinfo==0.2.1
-#### Django==4.1.2
-#### djangorestframework==3.14.0
-#### pytz==2022.5
-#### sqlparse==0.4.3
-
+django, djangorestframework, coreapi, coreapi-cli, pyyaml
