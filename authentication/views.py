@@ -13,9 +13,9 @@ from rest_framework import status
 from .models import EmailValidationToken, PasswordValidationToken
 from user.models import CustomUser
 from django.contrib.auth.password_validation import validate_password
-from django.core.mail import send_mail
 from authentication.emails import (
-    get_register_confirmation_email,
+    send_register_confirmation_email,
+    send_password_reset_email
 )
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions
@@ -36,7 +36,7 @@ from .messages import (
     ACCOUNT_DEACTIVATED,
 )
 
-from main.settings import EMAIL_VALIDATION_URL, PASSWORD_RESET_URL
+from main.settings import EMAIL_VALIDATION_URL, PASSWORD_RESET_URL, EMAIL_HOST_USER
 
 
 class Login(ObtainAuthToken):
@@ -51,7 +51,7 @@ class Login(ObtainAuthToken):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data["user"]
 
-        if not user.email_validated:
+        if not user.email_validated or user.is_active:
             api_response = format_api_response(
                 status=status.HTTP_400_BAD_REQUEST,
                 message=EMAIL_CONFIRMATION_REQUIRED,
@@ -61,17 +61,18 @@ class Login(ObtainAuthToken):
 
         if not user.is_active:
             api_response = format_api_response(
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_401_UNAUTHORIZED,
                 message=ACCOUNT_DEACTIVATED,
                 error=True,
             )
-            return Response(api_response, status=status.HTTP_400_BAD_REQUEST)
+            return Response(api_response, status=status.HTTP_401_UNAUTHORIZED)
 
         token, created = Token.objects.get_or_create(user=user)
         api_response = format_api_response(
             content={"token": token.key}, message=LOGIN_SUCCESS
         )
         return Response(api_response, status=status.HTTP_200_OK)
+
 
 login = Login.as_view()
 
@@ -103,10 +104,6 @@ class Register(APIView):
     def get_serializer(self, *args, **kwargs):
         return self.serializer_class(*args, **kwargs)
 
-    def get_email_confirmation_link(self, user):
-        email_token = EmailValidationToken.objects.create(user=user)
-        return f"{EMAIL_VALIDATION_URL}{email_token}"
-
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -124,16 +121,10 @@ class Register(APIView):
             return Response(api_response, status=status.HTTP_400_BAD_REQUEST)
 
         user = serializer.save()
-        confirmation_link = self.get_email_confirmation_link(user)
-        print("CONFIRMATION LINK :", confirmation_link)
+        email_token = EmailValidationToken.objects.create(user=user)
 
-        # send_mail(
-        #     f"Welcome {user.username}",
-        #     get_register_confirmation_email(user.username, "XXXXX"),
-        #     "noreply@APP_NAME.com",
-        #     [user.email],
-        #     fail_silently=False,
-        # )
+        send_register_confirmation_email(
+            user.email, user.username, email_token)
         api_response = format_api_response(message=REGISTER_SUCCESS)
 
         return Response(api_response, status=status.HTTP_200_OK)
@@ -240,19 +231,13 @@ class PasswordForget(APIView):
         if user:
             if user.email_validated:
                 (
-                    validation_token,
+                    password_token,
                     created,
                 ) = PasswordValidationToken.objects.get_or_create(user=user)
                 print("PASSWORD TOKEN:", validation_token)
 
-                # send_mail(
-                #     f"Welcome {user.username}",
-                #     register_confirmation_email(user.username, "XXXXX"),
-                #     "noreply@APP_NAME.com",
-                #     [user.email],
-                #     fail_silently=False,
-                # )
-
+                send_password_reset_email(
+                    user.email, user.username, password_token)
         api_response = format_api_response(message=PASSWORD_RESET_LINK_SENT)
         return Response(api_response, status=status.HTTP_200_OK)
 
@@ -313,7 +298,7 @@ class DeactivateAccount(APIView):
     """
     Deactivate user account, user will be disconnected and not able to connect anymore
     """
-    permission_classes = [permissions.IsAuthenticated()]
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         user = request.user

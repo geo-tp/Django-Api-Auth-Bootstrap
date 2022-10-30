@@ -147,11 +147,13 @@ AUTH_USER_MODEL = "user.CustomUser"
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
-EMAIL_HOST_USER = "XXXXXXXX"
-EMAIL_HOST_PASSWORD = "XXXXXXX"
+EMAIL_HOST_USER = "macartefidelite.test@gmail.com"
+EMAIL_HOST_PASSWORD = "atmimecajbilygjm"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 EMAIL_VALIDATION_URL = "http://localhost:3000/email-confirmation/"
 PASSWORD_RESET_URL = "http://localhost:3000/password-reset/"
+
+APP_NAME = "DEFAULT_NAME"
