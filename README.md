@@ -7,7 +7,8 @@ auto generated API documentation and administration panel.
 Installation
 -------
 
-This project was made with `python3.10.6`
+This project was created with `python3.10.6`
+You need to configure SMTP infos in `settings.py` to be able to send mail for registration, password reset...
 
 ### Create a python virtual environment
 ```python3 -m venv ENV_NAME```
@@ -32,11 +33,21 @@ This project was made with `python3.10.6`
 
 Routes
 -------
-When dev server is lauched, visit http://localhost:8000/api/v1/docs
+
+- Login
+- Logout
+- Register
+- Password Reset
+- Password Update
+- Email Validation
+- Profile
+- Deactivate account
+
+When dev server is lauched, visit http://localhost:8000/api/v1/documentation/
 
 Administration
 -------
-When dev server is lauched, visit http://localhost:8000/admin
+When dev server is lauched, visit http://localhost:8000/admin/
 
 Requirements
 -----
