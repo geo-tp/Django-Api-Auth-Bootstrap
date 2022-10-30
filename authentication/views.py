@@ -4,23 +4,21 @@ from rest_framework import permissions
 from rest_framework.authtoken.views import ObtainAuthToken
 from .serializers import (
     RegisterSerializer,
-    PasswordUpdateSerializer,
     PasswordResetSerializer,
     PasswordForgetSerializer,
 )
 from rest_framework.authtoken.models import Token
 from rest_framework import status
-from .models import EmailValidationToken, PasswordValidationToken
-from user.models import CustomUser
 from django.contrib.auth.password_validation import validate_password
+from django.shortcuts import get_object_or_404
+from django.core.exceptions import ValidationError
 from authentication.emails import (
     send_register_confirmation_email,
     send_password_reset_email
 )
-from django.shortcuts import get_object_or_404
-from rest_framework import permissions
-from django.core.exceptions import ValidationError
 from main.responses import format_api_response
+from user.models import CustomUser
+from .models import EmailValidationToken, PasswordValidationToken
 from .messages import (
     LOGIN_SUCCESS,
     LOGOUT_SUCCESS,
@@ -28,15 +26,12 @@ from .messages import (
     EMAIL_CONFIRMATION_REQUIRED,
     EMAIL_CONFIRMATION_DONE,
     EMAIL_CONFIRMATION_ALREADY_DONE,
-    OLD_PASSWORD_INCORRECT,
     PASSWORD_UPDATE_SUCCESS,
     PASSWORD_RESET_LINK_SENT,
     TOKEN_ALREADY_USED,
     MISC_ERROR,
     ACCOUNT_DEACTIVATED,
 )
-
-from main.settings import EMAIL_VALIDATION_URL, PASSWORD_RESET_URL, EMAIL_HOST_USER
 
 
 class Login(ObtainAuthToken):
@@ -51,7 +46,7 @@ class Login(ObtainAuthToken):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data["user"]
 
-        if not user.email_validated or user.is_active:
+        if not user.email_validated:
             api_response = format_api_response(
                 status=status.HTTP_400_BAD_REQUEST,
                 message=EMAIL_CONFIRMATION_REQUIRED,
@@ -139,7 +134,7 @@ class EmailValidation(APIView):
     """
     permission_classes = [permissions.AllowAny]
 
-    def post(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
 
         key = kwargs.get("key")
         validation_token = get_object_or_404(EmailValidationToken, key=key)
@@ -162,50 +157,6 @@ class EmailValidation(APIView):
 
 
 email_validation = EmailValidation.as_view()
-
-
-class PasswordUpdate(APIView):
-    """
-    Update user password
-    """
-    serializer_class = PasswordUpdateSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_serializer(self, *args, **kwargs):
-        return self.serializer_class(*args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        old_password = serializer.data["old_password"]
-        new_password = serializer.data["new_password"]
-        user = request.user
-
-        if not user.check_password(old_password):
-            api_response = format_api_response(
-                message=OLD_PASSWORD_INCORRECT, status=status.HTTP_400_BAD_REQUEST
-            )
-            return Response(api_response, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            validate_password(new_password, user)
-        except ValidationError as e:
-            api_response = format_api_response(
-                content={"password": e},
-                status=status.HTTP_400_BAD_REQUEST,
-                error=True,
-                message=MISC_ERROR,
-            )
-            return Response(api_response, status=status.HTTP_400_BAD_REQUEST)
-
-        user.set_password(new_password)
-        user.save()
-
-        api_reponse = format_api_response(message=PASSWORD_UPDATE_SUCCESS)
-        return Response(api_reponse, status=status.HTTP_200_OK)
-
-
-password_update = PasswordUpdate.as_view()
 
 
 class PasswordForget(APIView):
@@ -234,7 +185,6 @@ class PasswordForget(APIView):
                     password_token,
                     created,
                 ) = PasswordValidationToken.objects.get_or_create(user=user)
-                print("PASSWORD TOKEN:", validation_token)
 
                 send_password_reset_email(
                     user.email, user.username, password_token)
@@ -311,4 +261,4 @@ class DeactivateAccount(APIView):
         return Response(api_response, status=status.HTTP_200_OK)
 
 
-deactivate_account = DeactivateAccount().as_view()
+deactivate_account = DeactivateAccount.as_view()

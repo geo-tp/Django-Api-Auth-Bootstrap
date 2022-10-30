@@ -1,8 +1,4 @@
 from rest_framework import permissions
-from cart.models import CartItem, Cart
-from order.models import Order, Order_Product
-
-# from django.template.exceptions import DoesNotExist
 
 
 class IsOwner(permissions.BasePermission):

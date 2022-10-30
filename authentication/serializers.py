@@ -23,11 +23,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 
-class PasswordUpdateSerializer(serializers.Serializer):
-    old_password = serializers.CharField(max_length=100)
-    new_password = serializers.CharField(max_length=100)
-
-
 class PasswordForgetSerializer(serializers.Serializer):
     email = serializers.EmailField()
 

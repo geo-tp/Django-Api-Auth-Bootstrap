@@ -5,6 +5,9 @@ from .managers import CustomUserManager
 
 
 class CustomUser(AbstractUser):
+    """
+    Default user model
+    """
 
     RUE = "rue"
     BOULEVARD = "boulevard"
@@ -35,6 +38,7 @@ class CustomUser(AbstractUser):
     city = models.CharField(max_length=100, blank=True)
 
     phone_number = models.CharField(max_length=15, blank=True)
+    phone_validated = models.BooleanField(default=False)
 
     # USERNAME_FIELD = 'email'
     # REQUIRED_FIELDS = ["username"]
