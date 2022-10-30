@@ -3,12 +3,13 @@ Django API Bootstrap with Authentication
 
 Django Rest Framework API bootstrap with authentication features,
 auto generated API documentation and administration panel.
+Based on authentication token.
 
 Installation
 -------
 
 This project was created with `python3.10.6`.
-Based on authentication token.
+
 
 ### Create a python virtual environment
 ```python3 -m venv ENV_NAME```
