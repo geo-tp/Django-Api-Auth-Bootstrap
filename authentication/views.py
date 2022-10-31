@@ -14,9 +14,9 @@ from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
 from authentication.emails import (
     send_register_confirmation_email,
-    send_password_reset_email
+    send_password_reset_email,
 )
-from main.responses import format_api_response
+from main.response import format_api_response
 from user.models import CustomUser
 from .models import EmailValidationToken, PasswordValidationToken
 from .messages import (
@@ -93,6 +93,7 @@ class Register(APIView):
     """
     Register a new user
     """
+
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
 
@@ -118,8 +119,7 @@ class Register(APIView):
         user = serializer.save()
         email_token = EmailValidationToken.objects.create(user=user)
 
-        send_register_confirmation_email(
-            user.email, user.username, email_token)
+        send_register_confirmation_email(user.email, user.username, email_token)
         api_response = format_api_response(message=REGISTER_SUCCESS)
 
         return Response(api_response, status=status.HTTP_200_OK)
@@ -132,6 +132,7 @@ class EmailValidation(APIView):
     """
     Validate email with received token
     """
+
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, *args, **kwargs):
@@ -163,6 +164,7 @@ class PasswordForget(APIView):
     """
     Send a link to reset password by mail when a correct email address is provided
     """
+
     serializer_class = PasswordForgetSerializer
     permission_classes = [permissions.AllowAny]
 
@@ -186,8 +188,7 @@ class PasswordForget(APIView):
                     created,
                 ) = PasswordValidationToken.objects.get_or_create(user=user)
 
-                send_password_reset_email(
-                    user.email, user.username, password_token)
+                send_password_reset_email(user.email, user.username, password_token)
         api_response = format_api_response(message=PASSWORD_RESET_LINK_SENT)
         return Response(api_response, status=status.HTTP_200_OK)
 
@@ -199,6 +200,7 @@ class PasswordReset(APIView):
     """
     Reset user password with the one provided (requires password reset token)
     """
+
     serializer_class = PasswordResetSerializer
     permission_classes = [permissions.AllowAny]
 
@@ -248,6 +250,7 @@ class DeactivateAccount(APIView):
     """
     Deactivate user account, user will be disconnected and not able to connect anymore
     """
+
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):

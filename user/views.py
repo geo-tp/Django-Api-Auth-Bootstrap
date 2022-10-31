@@ -6,14 +6,13 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import permissions
 from rest_framework import status
-from main.responses import format_api_response
+from main.response import format_api_response
 from .serializers import ProfileSerializer, PasswordUpdateSerializer
 from .models import CustomUser
 from .messages import (
     OLD_PASSWORD_INCORRECT,
     PASSWORD_UPDATE_SUCCESS,
-    PROFILE_UPDATE_SUCCESS
-
+    PROFILE_UPDATE_SUCCESS,
 )
 
 

@@ -54,6 +54,8 @@ REST_FRAMEWORK = {
     ],
     "EXCEPTION_HANDLER": "main.exceptions.custom_exception_handler",
     "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
+    "DEFAULT_PAGINATION_CLASS": "main.pagination.CustomLimitOffsetPagination",
+    "PAGE_SIZE": 50,
 }
 
 AUTHENTICATION_BACKENDS = [
@@ -149,8 +151,8 @@ AUTH_USER_MODEL = "user.CustomUser"
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
-EMAIL_HOST_USER = "XXXXXX"
-EMAIL_HOST_PASSWORD = "XXXXXX"
+EMAIL_HOST_USER = "email@example.com"
+EMAIL_HOST_PASSWORD = "apikey"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

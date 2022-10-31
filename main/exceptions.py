@@ -1,5 +1,5 @@
 from rest_framework.views import exception_handler
-from .responses import format_api_response
+from .response import format_api_response
 
 
 def custom_exception_handler(exc, context):

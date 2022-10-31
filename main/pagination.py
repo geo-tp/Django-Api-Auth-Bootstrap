@@ -1,0 +1,18 @@
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework import status
+from main.response import format_api_response
+from rest_framework.response import Response
+
+
+class CustomLimitOffsetPagination(LimitOffsetPagination):
+    def get_paginated_response(self, data):
+
+        api_response = format_api_response(
+            content=data,
+            page_count=self.count,
+            next_=self.get_next_link(),
+            previous=self.get_previous_link(),
+            pagination=True,
+        )
+
+        return Response(api_response, status=status.HTTP_200_OK)
