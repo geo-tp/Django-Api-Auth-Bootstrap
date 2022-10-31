@@ -104,18 +104,6 @@ class Register(APIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        try:
-            password = request.data["password"]
-            validate_password(password)
-        except ValidationError as e:
-            api_response = format_api_response(
-                content={"password": e},
-                status=status.HTTP_400_BAD_REQUEST,
-                error=True,
-                message=MISC_ERROR,
-            )
-            return Response(api_response, status=status.HTTP_400_BAD_REQUEST)
-
         user = serializer.save()
         email_token = EmailValidationToken.objects.create(user=user)
 
@@ -222,18 +210,6 @@ class PasswordReset(APIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         password = serializer.data["password"]
-
-        try:
-            validate_password(password)
-        except ValidationError as e:
-            api_response = format_api_response(
-                content={"password": e},
-                status=status.HTTP_400_BAD_REQUEST,
-                error=True,
-                message=MISC_ERROR,
-            )
-            return Response(api_response, status=status.HTTP_400_BAD_REQUEST)
-
         user.set_password(password)
         user.save()
         validation_token.is_used = True

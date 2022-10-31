@@ -13,6 +13,7 @@ from .messages import (
     OLD_PASSWORD_INCORRECT,
     PASSWORD_UPDATE_SUCCESS,
     PROFILE_UPDATE_SUCCESS,
+    MISC_ERROR,
 )
 
 
@@ -35,18 +36,8 @@ class Password(APIView):
 
         if not user.check_password(old_password):
             api_response = format_api_response(
-                message=OLD_PASSWORD_INCORRECT, status=status.HTTP_400_BAD_REQUEST
-            )
-            return Response(api_response, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            validate_password(new_password, user)
-        except ValidationError as e:
-            api_response = format_api_response(
-                content={"password": e},
+                content={"old_password": [OLD_PASSWORD_INCORRECT]},
                 status=status.HTTP_400_BAD_REQUEST,
-                error=True,
-                message=MISC_ERROR,
             )
             return Response(api_response, status=status.HTTP_400_BAD_REQUEST)
 

@@ -34,7 +34,7 @@ class CustomUser(AbstractUser):
         max_length=50, choices=STREET_TYPES_CHOICES, blank=True
     )
     street_name = models.CharField(max_length=200, blank=True)
-    city_number = models.CharField(max_length=20, blank=True)
+    city_zipcode = models.CharField(max_length=20, blank=True)
     city = models.CharField(max_length=100, blank=True)
 
     phone_number = models.CharField(max_length=15, blank=True)
