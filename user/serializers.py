@@ -34,6 +34,8 @@ class ProfileSerializer(serializers.ModelSerializer):
             "street_name",
             "city_zipcode",
             "city",
+            "address_complement",
+            "country",
             "phone_number",
         ]
         read_only_fields = ["username", "email"]
@@ -66,6 +68,15 @@ class ProfileSerializer(serializers.ModelSerializer):
             return value
 
         raise serializers.ValidationError([CITY_FORMAT_INCORRECT])
+
+    def validate_country(self, value):
+
+        regexp_pattern = name_regexp_pattern
+
+        if re.search(regexp_pattern, value):
+            return value
+
+        raise serializers.ValidationError([COUNTRY_FORMAT_INCORRECT])
 
     def validate_street_name(self, value):
 
