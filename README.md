@@ -44,6 +44,9 @@ EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 ```
 
+Documentation
+------
+When dev server is lauched, visit http://localhost:8000/api/v1/documentation/
 
 Routes
 -------
@@ -56,8 +59,6 @@ Routes
 - Email Validation
 - Profile
 - Deactivate account
-
-When dev server is lauched, visit http://localhost:8000/api/v1/documentation/
 
 Responses
 -------
@@ -82,18 +83,18 @@ Pagination
 
 Resources are paginated if a list of more than 50 items is returned, you can configure pagination in `settings.py`
 
-List response pagination example
+List response success pagination example
 ```
 {
     "status": 200,
-    "message": false,
-    "error": true,
+    "message": "",
+    "error": false,
     "pagination: true",
     "page_count": 3,
     "next": "http://nexturl"
     "previous": "http://prevurl"
     "body": {
-        [{}, {}, {}]
+        [{}, {}, {}, {}, {}]
     }
 
 }
