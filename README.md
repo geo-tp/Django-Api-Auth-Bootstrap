@@ -1,9 +1,8 @@
 Django API Bootstrap with Authentication
 =========================
 
-Django Rest Framework API bootstrap with authentication features,
+Django Rest Framework API bootstrap with token authentication features,
 auto generated API documentation and administration panel.
-Based on authentication token.
 
 Installation
 -------
@@ -63,33 +62,65 @@ When dev server is lauched, visit http://localhost:8000/api/v1/documentation/
 Responses
 -------
 
-All API routes reponses have a generic json struct, with `status`, `message`, `error`, `body`. 
+Routes reponses have a generic json struct, with `status`, `message`, `error`, `body`, `pagination`. 
 
-Login example : 
+Login response success example : 
 ```
 {
-
     "status": 200,
     "message": "Successfully logged in",
     "error": false,
+    "pagination": false,
     "body": {
         "token": "6c3553912af1b3459be7c1d5833301df1c69f612"
+    }
+}
+```
+
+Pagination
+-------
+
+Resources are paginated if a list of more than 50 items is returned, you can configure pagination in `settings.py`
+
+List response pagination example
+```
+{
+    "status": 200,
+    "message": false,
+    "error": true,
+    "pagination: true",
+    "page_count": 3,
+    "next": "http://nexturl"
+    "previous": "http://prevurl"
+    "body": {
+        [{}, {}, {}]
     }
 
 }
 ```
+
+Errors
+-------
+
+If an error occurs during a form validation, `error` is set to `true` and `body` contains error details for each field.
+
+
+Register response error example
 ```
 {
-
     "status": 400,
     "message": "Your request can't be perfomed",
     "error": true,
+    "pagination: false",
     "body": {
-        "non_field_errors": [
-            "Unable to log in with provided credentials."
-        ]
+        "email": [
+            "Email is already used"
+        ],
+        "password": [
+            "Password must contains a special character",
+            "Password is too short "
+        ],
     }
-
 }
 ```
 
