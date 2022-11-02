@@ -151,11 +151,14 @@ AUTH_USER_MODEL = "user.CustomUser"
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
-EMAIL_HOST_USER = "email@example.com"
-EMAIL_HOST_PASSWORD = "apikey"
+EMAIL_HOST_USER = "macartefidelite.test@gmail.com"
+EMAIL_HOST_PASSWORD = "atmimecajbilygjm"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 EMAIL_VALIDATION_URL = "http://localhost:3000/email-confirmation/"
 PASSWORD_RESET_URL = "http://localhost:3000/password-reset/"
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = str(BASE_DIR) + MEDIA_URL

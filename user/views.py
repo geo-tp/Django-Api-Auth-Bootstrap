@@ -7,17 +7,23 @@ from rest_framework.decorators import action
 from rest_framework import permissions
 from rest_framework import status
 from main.response import format_api_response
-from .serializers import ProfileSerializer, PasswordUpdateSerializer
-from .models import CustomUser
+from .serializers import (
+    ProfileSerializer,
+    PasswordUpdateSerializer,
+    ImageUpdateSerializer,
+)
+from .models import CustomUser, UserImage
 from .messages import (
     OLD_PASSWORD_INCORRECT,
     PASSWORD_UPDATE_SUCCESS,
     PROFILE_UPDATE_SUCCESS,
     MISC_ERROR,
+    IMAGE_UPDATE_SUCCESS,
 )
+from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 
 
-class Password(APIView):
+class PasswordView(APIView):
     serializer_class = PasswordUpdateSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -48,10 +54,10 @@ class Password(APIView):
         return Response(api_reponse, status=status.HTTP_200_OK)
 
 
-password = Password.as_view()
+password_view = PasswordView.as_view()
 
 
-class Profile(APIView):
+class ProfileView(APIView):
 
     queryset = CustomUser.objects.all()
     serializer_class = ProfileSerializer
@@ -83,4 +89,32 @@ class Profile(APIView):
         return Response(api_response, status=status.HTTP_200_OK)
 
 
-profile = Profile.as_view()
+profile_view = ProfileView.as_view()
+
+
+class ImageView(APIView):
+
+    queryset = UserImage.objects.all()
+    serializer_class = ImageUpdateSerializer
+    permission_classes = [permissions.AllowAny]
+    parser_classes = (MultiPartParser, FormParser)
+
+    def get_serializer(self, *args, **kwargs):
+        return self.serializer_class(*args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        """
+        Update user picture
+        """
+        user_image = self.queryset.get(user_id=request.user.id)
+        serializer = self.get_serializer(user_image, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        api_response = format_api_response(
+            content=serializer.data, message=IMAGE_UPDATE_SUCCESS
+        )
+        return Response(api_response, status=status.HTTP_200_OK)
+
+
+image_view = ImageView.as_view()

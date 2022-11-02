@@ -1,9 +1,12 @@
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
+
 # from user.views import UserViewSet
 from rest_framework.documentation import include_docs_urls
 from rest_framework import permissions
+from django.conf.urls.static import static
+import main.settings as settings
 
 admin.site.site_header = "API Administration"
 admin.site.site_title = "API Administration"
@@ -25,3 +28,6 @@ urlpatterns = [
         ),
     ),
 ]
+
+# if settings.DEBUG is True:
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

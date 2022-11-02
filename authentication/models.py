@@ -8,7 +8,7 @@ from user.models import CustomUser
 
 class CustomToken(models.Model):
     """
-    The default authorization token model.
+    The default token model for email and password validation
     """
 
     key = models.CharField(_("Key"), max_length=40, primary_key=True)

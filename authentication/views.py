@@ -17,7 +17,7 @@ from authentication.emails import (
     send_password_reset_email,
 )
 from main.response import format_api_response
-from user.models import CustomUser
+from user.models import CustomUser, UserImage
 from .models import EmailValidationToken, PasswordValidationToken
 from .messages import (
     LOGIN_SUCCESS,
@@ -48,11 +48,11 @@ class Login(ObtainAuthToken):
 
         if not user.email_validated:
             api_response = format_api_response(
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_401_UNAUTHORIZED,
                 message=EMAIL_CONFIRMATION_REQUIRED,
                 error=True,
             )
-            return Response(api_response, status=status.HTTP_400_BAD_REQUEST)
+            return Response(api_response, status=status.HTTP_401_UNAUTHORIZED)
 
         if not user.is_active:
             api_response = format_api_response(
@@ -106,10 +106,12 @@ class Register(APIView):
 
         user = serializer.save()
         email_token = EmailValidationToken.objects.create(user=user)
-
         send_register_confirmation_email(user.email, user.username, email_token)
-        api_response = format_api_response(message=REGISTER_SUCCESS)
 
+        # User profile image, we create it now with default img and user will update it later
+        UserImage.objects.create(user=user)
+
+        api_response = format_api_response(message=REGISTER_SUCCESS)
         return Response(api_response, status=status.HTTP_200_OK)
 
 

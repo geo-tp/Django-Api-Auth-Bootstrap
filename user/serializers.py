@@ -3,7 +3,7 @@ from datetime import date
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework.fields import CurrentUserDefault
-from .models import CustomUser
+from .models import CustomUser, UserImage
 from .messages import (
     PHONE_FORMAT_INCORRECT,
     ZIPCODE_FORMAT_INCORRECT,
@@ -12,6 +12,7 @@ from .messages import (
     FIRST_NAME_FORMAT_INCORRECT,
     STREET_NAME_FORMAT_INCORRECT,
     BIRTH_DATE_FORMAT_INCORRECT,
+    COUNTRY_FORMAT_INCORRECT,
 )
 from main.regexp import (
     french_city_zipcode_regexp_pattern,
@@ -126,3 +127,12 @@ class PasswordUpdateSerializer(serializers.Serializer):
     def validate_new_password(self, value):
         validate_password(value, CustomUser)
         return value
+
+
+class ImageUpdateSerializer(serializers.ModelSerializer):
+
+    image = serializers.ImageField(required=True)
+
+    class Meta:
+        model = UserImage
+        fields = ["image", "image_thumbnail"]
