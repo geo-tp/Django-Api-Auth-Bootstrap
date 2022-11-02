@@ -58,6 +58,7 @@ Routes
 - Password Update
 - Email Validation
 - Profile
+- Profile Picture
 - Deactivate account
 
 Responses

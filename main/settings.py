@@ -151,8 +151,8 @@ AUTH_USER_MODEL = "user.CustomUser"
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
-EMAIL_HOST_USER = "macartefidelite.test@gmail.com"
-EMAIL_HOST_PASSWORD = "atmimecajbilygjm"
+EMAIL_HOST_USER = "XXXXXX"
+EMAIL_HOST_PASSWORD = "XXXXXX"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
