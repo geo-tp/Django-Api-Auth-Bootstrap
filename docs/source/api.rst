@@ -4,4 +4,6 @@ API
 .. autosummary::
    :toctree: generated
 
-   Django API
+   main.response
+   main.settings
+   user.models
