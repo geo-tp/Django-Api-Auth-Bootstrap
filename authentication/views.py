@@ -34,7 +34,7 @@ from .messages import (
 )
 
 
-class Login(ObtainAuthToken):
+class LoginView(ObtainAuthToken):
 
     permission_classes = [permissions.AllowAny]
 
@@ -69,10 +69,10 @@ class Login(ObtainAuthToken):
         return Response(api_response, status=status.HTTP_200_OK)
 
 
-login = Login.as_view()
+login_view = LoginView.as_view()
 
 
-class Logout(APIView):
+class LogoutView(APIView):
 
     permission_classes = [permissions.IsAuthenticated]
 
@@ -86,10 +86,10 @@ class Logout(APIView):
         return Response(api_response, status=status.HTTP_200_OK)
 
 
-logout = Logout.as_view()
+logout_view = LogoutView.as_view()
 
 
-class Register(APIView):
+class RegisterView(APIView):
     """
     Register a new user
     """
@@ -115,10 +115,10 @@ class Register(APIView):
         return Response(api_response, status=status.HTTP_200_OK)
 
 
-register = Register.as_view()
+register_view = RegisterView.as_view()
 
 
-class EmailValidation(APIView):
+class EmailValidationView(APIView):
     """
     Validate email with received token
     """
@@ -147,10 +147,10 @@ class EmailValidation(APIView):
         return Response(api_response, status=status.HTTP_200_OK)
 
 
-email_validation = EmailValidation.as_view()
+email_validation_view = EmailValidationView.as_view()
 
 
-class PasswordForget(APIView):
+class PasswordForgetView(APIView):
     """
     Send a link to reset password by mail when a correct email address is provided
     """
@@ -183,10 +183,10 @@ class PasswordForget(APIView):
         return Response(api_response, status=status.HTTP_200_OK)
 
 
-password_forget = PasswordForget.as_view()
+password_forget_view = PasswordForgetView.as_view()
 
 
-class PasswordReset(APIView):
+class PasswordResetView(APIView):
     """
     Reset user password with the one provided (requires password reset token)
     """
@@ -221,10 +221,10 @@ class PasswordReset(APIView):
         return Response(api_response, status=status.HTTP_200_OK)
 
 
-password_reset = PasswordReset.as_view()
+password_reset_view = PasswordResetView.as_view()
 
 
-class DeactivateAccount(APIView):
+class DeactivateAccountView(APIView):
     """
     Deactivate user account, user will be disconnected and not able to connect anymore
     """
@@ -242,4 +242,4 @@ class DeactivateAccount(APIView):
         return Response(api_response, status=status.HTTP_200_OK)
 
 
-deactivate_account = DeactivateAccount.as_view()
+deactivate_account_view = DeactivateAccountView.as_view()
