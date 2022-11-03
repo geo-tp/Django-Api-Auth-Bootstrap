@@ -46,7 +46,11 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 Documentation
 ------
-When dev server is lauched, visit http://localhost:8000/api/v1/documentation/
+
+This project uses readthedocs template to manage documentation. You can see it in `docs` folder. Please visit https://readthedocs.org/ for more information.
+
+When dev server is lauched, visit http://localhost:8000/api/v1/documentation/ to access endpoints debug.
+
 
 Routes
 -------
@@ -58,7 +62,6 @@ Routes
 - Password Update
 - Email Validation
 - Profile
-- Profile Picture
 - Deactivate account
 
 Responses
