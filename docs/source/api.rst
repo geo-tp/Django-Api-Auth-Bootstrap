@@ -4,6 +4,4 @@ API
 .. autosummary::
    :toctree: generated
 
-   main.response
-   main.settings
-   user.models
+   .. autofunction:: main.response.format_api_response
