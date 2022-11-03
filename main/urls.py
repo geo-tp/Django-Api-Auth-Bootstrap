@@ -21,9 +21,9 @@ urlpatterns = [
     path("api/v1/user/", include("user.urls")),
     path("api/v1/", include((api_router.urls))),
     path(
-        "api/v1/documentation/",
+        "api/v1/endpoints/",
         include_docs_urls(
-            title="API V1 Documentation",
+            title="API V1 Endpoints",
             permission_classes=[permissions.AllowAny],
         ),
     ),

@@ -49,7 +49,7 @@ Documentation
 
 This project uses readthedocs template to manage documentation. You can see it in `docs` folder. Please visit https://readthedocs.org/ for more information.
 
-When dev server is lauched, visit http://localhost:8000/api/v1/documentation/ to access endpoints debug.
+When dev server is lauched, visit http://localhost:8000/api/v1/endpoints/ to access endpoints utilities.
 
 
 Routes

@@ -1,18 +1,22 @@
 Authentication
-=====
+==========================
 
 This project uses a token based authentication system. When a user logs in, he gets a token that can be added to headers with `Authorization: "Token 6c3553912af1b3459be7c1d5833301df1c69f612"`.
 This token has an infinite lifespan, until user requests a logout.
 
-Register
-------
+For developpement purposes, please visit `/api/v1/endpoints`. This allows to try each routes.
 
-For register, user must send an `username`, an `email`and a `password`. `email` and `username` must be unique.
+Register
+----------------
+
+For register, user must send an `username`, an `email` and a `password`. `email` and `username` must be unique.
 If this information is correct, user will receive a email validation link to continue and be able to login.
 
 
 **Register : Succes request example**
+
 .. code-block:: json
+
     {
         "status": 200,
         "message": "Please check you mailbox to confirm you registration",
@@ -21,7 +25,9 @@ If this information is correct, user will receive a email validation link to con
     }
 
 **Register : Bad request example**
+
 .. code-block:: json
+
     {
 
         "status": 400,
@@ -41,13 +47,16 @@ If this information is correct, user will receive a email validation link to con
 
 
 Login
-----
+------------
 
 When user has registered and confirmed his email, he can login. Login can be done with : `username` / `password` or `email` / `password`. 
 
 **Login : Succes request example**
+
 .. code-block:: json
+
     {
+
         "status": 200,
         "message": "Successfully logged in",
         "error": false,
@@ -55,10 +64,13 @@ When user has registered and confirmed his email, he can login. Login can be don
         "body": {
             "token": "6c3553912af1b3459be7c1d5833301df1c69f612"
         }
+
     }
 
 **Login : Bad request example**
+
 .. code-block:: json
+
     {
 
         "status": 400,
@@ -75,12 +87,14 @@ When user has registered and confirmed his email, he can login. Login can be don
 
 
 Logout
------
+------------
 
 When a user requests a logout, authentication token will be removed.
 
 **Logout : Succes request example**
+
 .. code-block:: json
+
     {
         "status": 200,
         "message": "Successfully logged out",
