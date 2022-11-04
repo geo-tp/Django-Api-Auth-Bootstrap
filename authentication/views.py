@@ -7,7 +7,7 @@ from .serializers import (
     PasswordResetSerializer,
     PasswordForgetSerializer,
 )
-from rest_framework.authtoken.models import Token
+from authentication.models import AuthToken
 from rest_framework import status
 from django.contrib.auth.password_validation import validate_password
 from django.shortcuts import get_object_or_404
@@ -62,7 +62,7 @@ class LoginView(ObtainAuthToken):
             )
             return Response(api_response, status=status.HTTP_401_UNAUTHORIZED)
 
-        token, created = Token.objects.get_or_create(user=user)
+        token, created = AuthToken.objects.get_or_create(user=user)
         api_response = format_api_response(
             content={"token": token.key}, message=LOGIN_SUCCESS
         )
@@ -233,7 +233,7 @@ class DeactivateAccountView(APIView):
 
     def post(self, request, *args, **kwargs):
         user = request.user
-        auth_token = Token.objects.get(user=user)
+        auth_token = AuthToken.objects.get(user=user)
         auth_token.delete()
         user.is_active = False
         user.save()
