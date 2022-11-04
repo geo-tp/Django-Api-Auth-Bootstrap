@@ -1,7 +1,3 @@
-from io import BytesIO
-import sys
-from PIL import Image
-from django.core.files import File
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
@@ -37,51 +33,56 @@ class CustomUser(AbstractUser):
         return self.username
 
 
-class UserImage(models.Model):
-
-    image = models.ImageField(
-        verbose_name="user image large", default="default-user.webp"
-    )
-
-    image_thumbnail = models.ImageField(
-        verbose_name="user image thumbnail", default="default-user.webp"
-    )
-
+class UserProfileImage(models.Model):
+    image = models.ForeignKey("generic.CompressedImage", on_delete=models.CASCADE)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
 
-    def save(self, *args, **kwargs):
-        """
-        Compress image and create thumbnail
-        """
-        if not self.image.readable():
-            return
 
-        # open the file as PIL image
-        image = Image.open(self.image)
+# class UserImage(models.Model):
 
-        # set up an in-memory byte io interfaces for image/image_thumbnail
-        image_io = BytesIO()
-        image_io2 = BytesIO()
+#     image = models.ImageField(
+#         verbose_name="user image large", default="default-user.webp"
+#     )
 
-        # compress img
-        image_compressed = image.save(image_io, image.format, quality=60, optimize=True)
-        self.image = File(image_io, name=self.image.name)
+#     image_thumbnail = models.ImageField(
+#         verbose_name="user image thumbnail", default="default-user.webp"
+#     )
 
-        # get width
-        img_width, _ = image.size
+#     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
 
-        # checking the width
-        default_thumbnail_width = 200
-        if img_width > default_thumbnail_width:
-            # create the thumbnail
-            image.thumbnail(
-                (default_thumbnail_width, default_thumbnail_width),
-                Image.LANCZOS,
-            )
+#     def save(self, *args, **kwargs):
+#         """
+#         Compress image and create thumbnail
+#         """
+#         if not self.image.readable():
+#             return
 
-        # save the results to the in-memory file
-        image.save(image_io2, image.format, quality=60, optimize=True)
-        # change content to the new file
-        self.image_thumbnail = File(image_io2, name=self.image.name)
+#         # open the file as PIL image
+#         image = Image.open(self.image)
 
-        return super().save(*args, **kwargs)
+#         # set up an in-memory byte io interfaces for image/image_thumbnail
+#         image_io = BytesIO()
+#         image_io2 = BytesIO()
+
+#         # compress img
+#         image_compressed = image.save(image_io, image.format, quality=60, optimize=True)
+#         self.image = File(image_io, name=self.image.name)
+
+#         # get width
+#         img_width, _ = image.size
+
+#         # checking the width
+#         default_thumbnail_width = 200
+#         if img_width > default_thumbnail_width:
+#             # create the thumbnail
+#             image.thumbnail(
+#                 (default_thumbnail_width, default_thumbnail_width),
+#                 Image.LANCZOS,
+#             )
+
+#         # save the results to the in-memory file
+#         image.save(image_io2, image.format, quality=60, optimize=True)
+#         # change content to the new file
+#         self.image_thumbnail = File(image_io2, name=self.image.name)
+
+#         return super().save(*args, **kwargs)

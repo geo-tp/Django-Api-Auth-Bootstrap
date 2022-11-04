@@ -6,13 +6,13 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import permissions
 from rest_framework import status
-from main.response import format_api_response
+from generic.response import format_api_response
+from generic.serializers import CompressedImageSerializer
 from .serializers import (
     ProfileSerializer,
     PasswordUpdateSerializer,
-    ImageUpdateSerializer,
 )
-from .models import CustomUser, UserImage
+from .models import CustomUser, UserProfileImage
 from .messages import (
     OLD_PASSWORD_INCORRECT,
     PASSWORD_UPDATE_SUCCESS,
@@ -94,8 +94,8 @@ profile_view = ProfileView.as_view()
 
 class ImageView(APIView):
 
-    queryset = UserImage.objects.all()
-    serializer_class = ImageUpdateSerializer
+    queryset = UserProfileImage.objects.all()
+    serializer_class = CompressedImageSerializer
     permission_classes = [permissions.AllowAny]
     parser_classes = (MultiPartParser, FormParser)
 
@@ -106,8 +106,15 @@ class ImageView(APIView):
         """
         Update user picture
         """
-        user_image = self.queryset.get(user_id=request.user.id)
-        serializer = self.get_serializer(user_image, data=request.data)
+
+        user_profile_image = self.queryset.get(user=request.user)
+        image_instance = user_profile_image.image  # instance of CompressedImage model
+        serializer = self.get_serializer(
+            image_instance,
+            data=request.data,
+            partial=True,
+            # we use partial, we just need image field, thumbnail will be auto generated
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
 

@@ -1,4 +1,4 @@
 General
 ===================================
 
-.. py:func:: `main.response.format_api_response`
+.. py:func:: `generic.response.format_api_response`

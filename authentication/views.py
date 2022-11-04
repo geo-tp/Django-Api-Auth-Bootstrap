@@ -16,8 +16,9 @@ from authentication.emails import (
     send_register_confirmation_email,
     send_password_reset_email,
 )
-from main.response import format_api_response
-from user.models import CustomUser, UserImage
+from generic.response import format_api_response
+from user.models import CustomUser, UserProfileImage
+from generic.models import CompressedImage
 from .models import EmailValidationToken, PasswordValidationToken
 from .messages import (
     LOGIN_SUCCESS,
@@ -108,8 +109,9 @@ class RegisterView(APIView):
         email_token = EmailValidationToken.objects.create(user=user)
         send_register_confirmation_email(user.email, user.username, email_token)
 
-        # User profile image, we create it now with default img and user will update it later
-        UserImage.objects.create(user=user)
+        # User profile image, we create it now with placeholder img
+        placeholder_img = CompressedImage.objects.create()
+        UserProfileImage.objects.create(user=user, image=placeholder_img)
 
         api_response = format_api_response(message=REGISTER_SUCCESS)
         return Response(api_response, status=status.HTTP_200_OK)

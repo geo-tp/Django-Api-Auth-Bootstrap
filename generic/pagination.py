@@ -1,6 +1,6 @@
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework import status
-from main.response import format_api_response
+from generic.response import format_api_response
 from rest_framework.response import Response
 
 

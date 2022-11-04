@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework.authtoken",
+    "generic",
     "user",
     "authentication",
 ]
@@ -52,9 +53,9 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
-    "EXCEPTION_HANDLER": "main.exceptions.custom_exception_handler",
+    "EXCEPTION_HANDLER": "generic.exceptions.custom_exception_handler",
     "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
-    "DEFAULT_PAGINATION_CLASS": "main.pagination.CustomLimitOffsetPagination",
+    "DEFAULT_PAGINATION_CLASS": "generic.pagination.CustomLimitOffsetPagination",
     "PAGE_SIZE": 50,
 }
 
@@ -147,12 +148,16 @@ STATIC_URL = "/static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# # # # # USER # # # # #
+
 AUTH_USER_MODEL = "user.CustomUser"
+
+# # # # # EMAIL # # # # #
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
-EMAIL_HOST_USER = "XXXXXX"
-EMAIL_HOST_PASSWORD = "XXXXXX"
+EMAIL_HOST_USER = "XXXX"
+EMAIL_HOST_PASSWORD = "XXXX"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
@@ -160,5 +165,10 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 EMAIL_VALIDATION_URL = "http://localhost:3000/email-confirmation/"
 PASSWORD_RESET_URL = "http://localhost:3000/password-reset/"
 
+# # # # # MEDIA # # # # #
+
 MEDIA_URL = "/media/"
 MEDIA_ROOT = str(BASE_DIR) + MEDIA_URL
+IMAGE_THUMBNAIL_WIDTH = 200  # px
+IMAGE_MAX_WIDTH = 1200  # px
+IMAGE_COMPRESSION_LEVEL = 60  # %

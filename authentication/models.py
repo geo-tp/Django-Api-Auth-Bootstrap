@@ -9,7 +9,7 @@ from rest_framework.authtoken.models import Token
 
 class CustomToken(models.Model):
     """
-    The default token model for email and password validation
+    The default token model for non auth usage
     """
 
     key = models.CharField(_("Key"), max_length=40, primary_key=True)
@@ -34,7 +34,7 @@ class CustomToken(models.Model):
 
 class AuthToken(Token):
     """
-    Token for authenticate user
+    Token for authenticate user, the one returned when succesfull login
     """
 
     pass
