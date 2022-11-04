@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from rest_framework import permissions
 from rest_framework import status
 from generic.response import format_api_response
-from generic.serializers import CompressedImageSerializer
+from generic.serializers import GenericImageSerializer
 from .serializers import (
     ProfileSerializer,
     PasswordUpdateSerializer,
@@ -95,7 +95,7 @@ profile_view = ProfileView.as_view()
 class ImageView(APIView):
 
     queryset = UserProfileImage.objects.all()
-    serializer_class = CompressedImageSerializer
+    serializer_class = GenericImageSerializer
     permission_classes = [permissions.AllowAny]
     parser_classes = (MultiPartParser, FormParser)
 
@@ -108,7 +108,7 @@ class ImageView(APIView):
         """
 
         user_profile_image = self.queryset.get(user=request.user)
-        image_instance = user_profile_image.image  # instance of CompressedImage model
+        image_instance = user_profile_image.image  # instance of GenericImage model
         serializer = self.get_serializer(
             image_instance,
             data=request.data,

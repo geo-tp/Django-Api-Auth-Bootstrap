@@ -18,7 +18,7 @@ from authentication.emails import (
 )
 from generic.response import format_api_response
 from user.models import CustomUser, UserProfileImage
-from generic.models import CompressedImage
+from generic.models import GenericImage
 from .models import EmailValidationToken, PasswordValidationToken
 from .messages import (
     LOGIN_SUCCESS,
@@ -110,7 +110,7 @@ class RegisterView(APIView):
         send_register_confirmation_email(user.email, user.username, email_token)
 
         # User profile image, we create it now with placeholder img
-        placeholder_img = CompressedImage.objects.create()
+        placeholder_img = GenericImage.objects.create()
         UserProfileImage.objects.create(user=user, image=placeholder_img)
 
         api_response = format_api_response(message=REGISTER_SUCCESS)

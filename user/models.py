@@ -34,7 +34,7 @@ class CustomUser(AbstractUser):
 
 
 class UserProfileImage(models.Model):
-    image = models.ForeignKey("generic.CompressedImage", on_delete=models.CASCADE)
+    image = models.ForeignKey("generic.GenericImage", on_delete=models.CASCADE)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
 
 

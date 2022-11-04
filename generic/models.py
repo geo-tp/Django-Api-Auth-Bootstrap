@@ -11,7 +11,7 @@ from main.settings import (
 )
 
 
-class CompressedImage(models.Model):
+class GenericImage(models.Model):
     """
     Generic image model with auto compression/resizing and thumbnail generation
     """

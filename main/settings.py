@@ -148,11 +148,11 @@ STATIC_URL = "/static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# # # # # USER # # # # #
+# User model for authentication process
 
 AUTH_USER_MODEL = "user.CustomUser"
 
-# # # # # EMAIL # # # # #
+# Email config for sending confirmation mail and more
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
@@ -165,10 +165,10 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 EMAIL_VALIDATION_URL = "http://localhost:3000/email-confirmation/"
 PASSWORD_RESET_URL = "http://localhost:3000/password-reset/"
 
-# # # # # MEDIA # # # # #
+# Media config for images
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = str(BASE_DIR) + MEDIA_URL
-IMAGE_THUMBNAIL_WIDTH = 200  # px
-IMAGE_MAX_WIDTH = 1200  # px
-IMAGE_COMPRESSION_LEVEL = 60  # %
+IMAGE_THUMBNAIL_WIDTH = 200  # px for auto generated thumbnail
+IMAGE_MAX_WIDTH = 1200  # px for all incoming images
+IMAGE_COMPRESSION_LEVEL = 60  # % for all incoming images

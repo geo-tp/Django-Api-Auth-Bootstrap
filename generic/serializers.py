@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from generic.models import CompressedImage
+from generic.models import GenericImage
 
 
-class CompressedImageSerializer(serializers.ModelSerializer):
+class GenericImageSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CompressedImage
+        model = GenericImage
         fields = ["image", "image_thumbnail"]
