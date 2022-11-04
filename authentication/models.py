@@ -4,18 +4,16 @@ import os
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from user.models import CustomUser
-from rest_framework.authtoken.models import Token
 
 
-class CustomToken(models.Model):
+class AbstractCustomToken(models.Model):
     """
-    The default token model for non auth usage
+    The default abstract token model
     """
 
     key = models.CharField(_("Key"), max_length=40, primary_key=True)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     created = models.DateTimeField(_("Created"), auto_now_add=True)
-    is_used = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
@@ -23,7 +21,7 @@ class CustomToken(models.Model):
     def save(self, *args, **kwargs):
         if not self.key:
             self.key = self.generate_key()
-        return super(CustomToken, self).save(*args, **kwargs)
+        return super(AbstractCustomToken, self).save(*args, **kwargs)
 
     def generate_key(self):
         return binascii.hexlify(os.urandom(20)).decode()
@@ -32,7 +30,7 @@ class CustomToken(models.Model):
         return self.key
 
 
-class AuthToken(Token):
+class AuthToken(AbstractCustomToken):
     """
     Token for authenticate user, the one returned when succesfull login
     """
@@ -40,17 +38,21 @@ class AuthToken(Token):
     pass
 
 
-class EmailValidationToken(CustomToken):
+class EmailValidationToken(AbstractCustomToken):
     """
     Token sended to user email during user registration process
     """
 
+    is_used = models.BooleanField(default=False)
+
     pass
 
 
-class PasswordValidationToken(CustomToken):
+class PasswordValidationToken(AbstractCustomToken):
     """
     Token sended to user email during password reset process
     """
+
+    is_used = models.BooleanField(default=False)
 
     pass
