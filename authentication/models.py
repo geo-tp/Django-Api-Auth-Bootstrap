@@ -4,6 +4,7 @@ import os
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from user.models import CustomUser
+from main import settings
 
 
 class AbstractCustomToken(models.Model):
@@ -31,6 +32,12 @@ class AbstractCustomToken(models.Model):
 
 
 class AuthToken(AbstractCustomToken):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        related_name="auth_token",
+        on_delete=models.CASCADE,
+        verbose_name=_("User"),
+    )
     """
     Token for authenticate user, the one returned when succesfull login
     """

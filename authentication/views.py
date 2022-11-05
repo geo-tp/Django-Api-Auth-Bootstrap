@@ -113,8 +113,10 @@ class RegisterView(APIView):
         placeholder_img = GenericImage.objects.create()
         UserProfileImage.objects.create(user=user, image=placeholder_img)
 
-        api_response = format_api_response(message=REGISTER_SUCCESS)
-        return Response(api_response, status=status.HTTP_200_OK)
+        api_response = format_api_response(
+            message=REGISTER_SUCCESS, status=status.HTTP_201_CREATED
+        )
+        return Response(api_response, status=status.HTTP_201_CREATED)
 
 
 register_view = RegisterView.as_view()
