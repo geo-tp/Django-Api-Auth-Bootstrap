@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from .managers import CustomUserManager
+from main import settings
 
 
 class CustomUser(AbstractUser):
@@ -35,7 +36,12 @@ class CustomUser(AbstractUser):
 
 class UserProfileImage(models.Model):
     image = models.ForeignKey("generic.GenericImage", on_delete=models.CASCADE)
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        related_name="user_image",
+        on_delete=models.CASCADE,
+        verbose_name=_("User"),
+    )
 
 
 # class UserImage(models.Model):

@@ -4,6 +4,7 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework.fields import CurrentUserDefault
 from .models import CustomUser, UserProfileImage
+from generic.serializers import GenericImageSerializer
 from .messages import (
     PHONE_FORMAT_INCORRECT,
     ZIPCODE_FORMAT_INCORRECT,
@@ -40,6 +41,23 @@ class ProfileSerializer(serializers.ModelSerializer):
             "phone_number",
         ]
         read_only_fields = ["username", "email"]
+
+    def to_representation(self, user):
+        """
+        Add profile image and thumbnail to representation
+        """
+        representation = super().to_representation(user)
+        profile_image_instance = UserProfileImage.objects.get(user=user)
+        generic_image_instance = profile_image_instance.image
+
+        generic_image_serializer = GenericImageSerializer(generic_image_instance)
+        profile_image = generic_image_serializer.data["image"]
+        profile_thumbnail = generic_image_serializer.data["image_thumbnail"]
+
+        representation["profile_image"] = profile_image
+        representation["profile_image_thumbnail"] = profile_thumbnail
+
+        return representation
 
     def validate_phone_number(self, value):
 
