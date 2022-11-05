@@ -12,7 +12,7 @@ class CustomUser(AbstractUser):
 
     username = models.CharField(max_length=50, unique=True, blank=True)
 
-    date_of_birth = models.DateField(blank=True, null=True)
+    birthdate = models.DateField(blank=True, null=True)
 
     street_number = models.CharField(max_length=20, blank=True)
     street_type = models.CharField(max_length=50, blank=True)
@@ -38,7 +38,7 @@ class UserProfileImage(models.Model):
     image = models.ForeignKey("generic.GenericImage", on_delete=models.CASCADE)
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
-        related_name="user_image",
+        related_name="profile_image",
         on_delete=models.CASCADE,
         verbose_name=_("User"),
     )

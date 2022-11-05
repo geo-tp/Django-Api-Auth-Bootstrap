@@ -92,7 +92,7 @@ class ProfileView(APIView):
 profile_view = ProfileView.as_view()
 
 
-class ImageView(APIView):
+class ProfileImageView(APIView):
 
     queryset = UserProfileImage.objects.all()
     serializer_class = GenericImageSerializer
@@ -124,4 +124,4 @@ class ImageView(APIView):
         return Response(api_response, status=status.HTTP_200_OK)
 
 
-image_view = ImageView.as_view()
+profile_image_view = ProfileImageView.as_view()

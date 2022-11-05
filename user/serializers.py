@@ -30,7 +30,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "email",
             "first_name",
             "last_name",
-            "date_of_birth",
+            "birthdate",
             "street_number",
             "street_type",
             "street_name",
