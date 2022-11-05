@@ -12,7 +12,7 @@ class AbstractCustomToken(models.Model):
     The default abstract token model
     """
 
-    key = models.CharField(_("Key"), max_length=40, primary_key=True)
+    key = models.CharField(_("Key"), max_length=20, primary_key=True)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     created = models.DateTimeField(_("Created"), auto_now_add=True)
 
@@ -32,17 +32,16 @@ class AbstractCustomToken(models.Model):
 
 
 class AuthToken(AbstractCustomToken):
+    """
+    Token for authenticate user, the one returned when succesfull login
+    """
+
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         related_name="auth_token",
         on_delete=models.CASCADE,
         verbose_name=_("User"),
     )
-    """
-    Token for authenticate user, the one returned when succesfull login
-    """
-
-    pass
 
 
 class EmailValidationToken(AbstractCustomToken):
@@ -52,8 +51,6 @@ class EmailValidationToken(AbstractCustomToken):
 
     is_used = models.BooleanField(default=False)
 
-    pass
-
 
 class PasswordValidationToken(AbstractCustomToken):
     """
@@ -61,5 +58,3 @@ class PasswordValidationToken(AbstractCustomToken):
     """
 
     is_used = models.BooleanField(default=False)
-
-    pass

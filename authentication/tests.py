@@ -1,10 +1,10 @@
 from django.test import TestCase
-
-# Create your tests here.
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from user.models import CustomUser
+from user.models import CustomUser, UserProfileImage
+from generic.models import GenericImage
+from generic.tests import APITestCaseWithUser
 from authentication.models import (
     EmailValidationToken,
     AuthToken,
@@ -12,60 +12,41 @@ from authentication.models import (
 )
 
 
-class AuthenticationTests(APITestCase):
+class AuthenticationTests(APITestCaseWithUser):
+    """
+    Tests for each Authentication view
+    """
 
-    user_id = 1
-    username = "Testing"
-    email = "testingApp@mail.com"
-    password = "TestingTesting"
-    auth_token = "auth69875ecdaa628405940f83a3ba6f3a466718"
-    email_validation_token = "email9875ecdaa628405940f83a3ba6f3a466718"
-    password_reset_token = "password5ecdaa628405940f83a3ba6f3a466718"
+    def test_register(self):
+        """
+        Ensure we can create a new account and receive an email to finalise registration.
+        """
+        url = reverse("api_register")
+        data = {
+            "username": "RegisterExample",
+            "email": "email_example@mail.com",
+            "password": "ARandomPassword",
+        }
+        response = self.client.post(url, data, format="json")
+        user = CustomUser.objects.get(email=data["email"])
 
-    @classmethod
-    def setUpClass(cls):
-        user = CustomUser.objects.create_user(
-            username=cls.username,
-            email=cls.email,
-            password=cls.password,
-            email_validated=True,
+        self.assertIsNotNone(EmailValidationToken.objects.get(user=user))
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(
+            user.username,
+            data["username"],
         )
-
-        AuthToken.objects.create(user=user, key=cls.auth_token)
-        EmailValidationToken.objects.create(user=user, key=cls.email_validation_token)
-        PasswordValidationToken.objects.create(user=user, key=cls.password_reset_token)
-
-        super().setUpClass()
-
-    # def test_register(self):
-    #     """
-    #     Ensure we can create a new account object.
-    #     """
-    #     url = reverse("api_register")
-    #     data = {
-    #         "username": "RegisterExample",
-    #         "email": "email_example@mail.com",
-    #         "password": "ARandomPassword",
-    #     }
-    #     response = self.client.post(url, data, format="json")
-
-    #     self.assertEqual(EmailValidationToken.objects.count(), 1)
-    #     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-    #     self.assertEqual(
-    #         CustomUser.objects.get(email=data["email"]).username,
-    #         data["username"],
-    #     )
 
     def test_email_validation(self):
         """
-        Ensure we can confirm email with provided token
+        Ensure we can confirm email with received token
         """
 
         url = reverse(
             "api_email_validation", kwargs={"key": self.email_validation_token}
         )
         response = self.client.get(url, format="json")
-        user = CustomUser.objects.get(id=self.user_id)
+        user = CustomUser.objects.get(email=self.email)
         email_token = EmailValidationToken.objects.get(key=self.email_validation_token)
 
         self.assertEqual(email_token.is_used, 1)
@@ -73,7 +54,7 @@ class AuthenticationTests(APITestCase):
 
     def test_login(self):
         """
-        Ensure we can login with credentials and obtain a token
+        Ensure we can login with credentials and obtain a auth token
         """
         url = reverse("api_login")
 
@@ -83,12 +64,39 @@ class AuthenticationTests(APITestCase):
             data,
             format="json",
         )
-        user = CustomUser.objects.get(id=self.user_id)
+        user = CustomUser.objects.get(email=self.email)
         response_token = response.data["body"]["token"]
         user_token = AuthToken.objects.get(user=user).key
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_token, user_token)
+
+    def test_password_forget(self):
+        """
+        Ensure we can request and receive a reset password token
+        """
+
+        url = reverse("api_password_forget")
+        data = {"email": self.email}
+        response = self.client.post(url, data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_password_reset(self):
+        """
+        Ensure we can reset password with received token
+        """
+
+        url = reverse("api_password_reset", kwargs={"key": self.password_reset_token})
+        data = {"password": "TestingTesting"}
+
+        response = self.client.post(url, data, format="json")
+        password_reset_instance = PasswordValidationToken.objects.get(
+            key=self.password_reset_token
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(password_reset_instance.is_used, 1)
 
     def test_logout(self):
         """
@@ -103,3 +111,28 @@ class AuthenticationTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(AuthToken.objects.count(), 0)
+
+    def test_deactivate_account(self):
+        """
+        Ensure we can deactivate account and not be able to connect anymore
+        """
+
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.auth_token)
+        deactivate_url = reverse("api_deactivate_account")
+        deactivate_response = self.client.post(deactivate_url, format="json")
+
+        self.client.credentials(HTTP_AUTHORIZATION="")
+        data = {"username": self.email, "password": self.password}
+        login_url = reverse("api_login")
+        login_response = self.client.post(
+            login_url,
+            data,
+            format="json",
+        )
+
+        # Deactivate response
+        self.assertEqual(deactivate_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(AuthToken.objects.count(), 0)
+
+        # Login response
+        self.assertEqual(login_response.status_code, status.HTTP_400_BAD_REQUEST)
