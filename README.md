@@ -11,25 +11,25 @@ This project was created with `python3.10.6`.
 
 
 ### Create a python virtual environment
-```python3 -m venv ENV_NAME```
+```python -m venv ENV_NAME```
 
 ### Load virtual environment
 ```source ENV_NAME/bin/activate```
 
 ### Install requirements
-```pip install -r requirements.txt```
+```python -m pip install -r requirements.txt```
 
 ### Prepare Database migrations
-```./manage.py makemigrations```
+```python manage.py makemigrations```
 
 ### Migrate Database
-```./manage.py migrate```
+```python manage.py migrate```
 
 ### Create Admin user
- ```./manage.py createsuperuser```
+ ```python manage.py createsuperuser```
 
 ### Lauch Dev server
-```./manage.py runserver```
+```python manage.py runserver```
 
 ### Set SMTP informations
 It requires to set mail informations in `settings.py`, it allows application to send link during register or password reset process.

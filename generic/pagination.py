@@ -9,7 +9,7 @@ class CustomLimitOffsetPagination(LimitOffsetPagination):
 
         api_response = format_api_response(
             content=data,
-            page_count=self.count,
+            count=self.count,
             next_=self.get_next_link(),
             previous=self.get_previous_link(),
             pagination=True,

@@ -6,7 +6,7 @@ def format_api_response(
     pagination=False,
     next_=None,
     previous=None,
-    page_count=None,
+    count=None,
 ):
     """
     Return a formatted json api response
@@ -32,11 +32,11 @@ def format_api_response(
     response = {"status": status, "message": message}
     response["error"] = True if error else False
 
-    if pagination and page_count:
+    if pagination and count:
         response["pagination"] = True
         response["next"] = next_
         response["previous"] = previous
-        response["page_count"] = page_count
+        response["count"] = count
 
     else:
         response["pagination"] = False
